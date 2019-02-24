@@ -289,13 +289,15 @@ bool ESPWifi::recvNonBlock(char ** output, int & channel)
 {
 	char * msg = readFromBoard();
 	if (strstr(msg, "+IPD")) {
-		char * c = strstr(msg, "+IPD,") + 5;
-		unsigned long channelLen = (unsigned long)(strrchr(c, ',') - c);
-		char * ch = new char[channelLen + 1];
-		memcpy(ch, c, channelLen);
-		ch[channelLen] = '\0';
-		channel = atoi(ch);
-		delete[] ch;
+		if(strchr(msg, ',') != strrchr(msg, ',')) { //if multiple connection mode
+			char * c = strstr(msg, "+IPD,") + 5;
+			unsigned long channelLen = (unsigned long)(strrchr(c, ',') - c);
+			char * ch = new char[channelLen + 1];
+			memcpy(ch, c, channelLen);
+			ch[channelLen] = '\0';
+			channel = atoi(ch);
+			delete[] ch;
+		}
 
 		char * s = strrchr(msg, ',') + 1;
 		unsigned long sizeLen = (unsigned long)(strchr(s, ':') - s);
@@ -364,6 +366,11 @@ bool ESPWifi::checkSendCode(unsigned long delay) const
 	bool s = strstr(out, "SEND OK");
 	delete[] out;
 	return s;
+}
+
+bool ESPWifi::isConnectedToServer() const
+{
+	return connectedToServer;
 }
 
 connection::~connection()
