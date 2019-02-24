@@ -66,3 +66,19 @@ void loop() {
     }
 }
 ```
+
+##### AP
+
+```C++
+ESPWifi wifi(&softwareSerial);
+wifi.setWifiMode(wifiMode::ap);
+if(!wifi.startAP("NotSketchyWifi", "letmein1", wifiEnc::wpa2)) Serial.println("Could not start ap");
+//Some code
+connection * connections;
+unsigned long num;
+wifi.getConnectedClients(&connections, num);
+for(unsigned long i = 0; i < num; ++i){
+    Serial.print(connections[i].ip); Serial.print(" -- "); Serial.println(connections[i].mac);
+}
+delete[] connections;
+```
