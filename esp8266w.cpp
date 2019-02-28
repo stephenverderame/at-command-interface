@@ -234,6 +234,20 @@ void ESPWifi::safeDelay(unsigned long milli) const
 	while (millis() < start + milli);
 }
 
+ESPString operator+(const ESPString & a, const ESPString & b)
+{
+	a.length();
+	b.length();
+	ESPString out;
+	out.str = new char[a.len + b.len + 1];
+	memcpy(out.str, a.str, a.len);
+	memcpy(out.str + a.len, b.str, b.len);
+	out.len = a.len + b.len;
+	out.str[out.len] = '\0';
+	return out;
+
+}
+
 char * readline(const char * input, unsigned long & pos)
 {
 	char * eol = strstr(input + pos, "\r\n");
@@ -373,6 +387,16 @@ bool ESPWifi::isConnectedToServer() const
 	return connectedToServer;
 }
 
+bool ESPWifi::changeBaudRate(int baudRate) const
+{
+	char cmd[30];
+	sprintf(cmd, "AT+UART_DEF=%d,8,1,0,0", baudRate);
+	char * out;
+	bool s = sendCommand(cmd, &out);
+	delete[] out;
+	return s;
+}
+
 connection::~connection()
 {
 	if (ip != nullptr) delete[] ip;
@@ -385,4 +409,91 @@ connection::connection() : ip(nullptr), mac(nullptr)
 
 client::client() : connected(false), hasMessage(false)
 {
+}
+
+ESPString::ESPString() : len(0), str(nullptr)
+{
+}
+
+ESPString::ESPString(const ESPString & other)
+{
+	str = new char[other.len + 1];
+	strcpy(str, other.str);
+	len = other.len;
+}
+
+ESPString::ESPString(const char * str)
+{
+	this->str = new char[strlen(str) + 1];
+	strcpy(this->str, str);
+	len = strlen(str);
+}
+
+ESPString::~ESPString()
+{
+	if (str != nullptr) delete[] str;
+}
+
+ESPString & ESPString::operator=(const ESPString & other)
+{
+	if (str != nullptr) delete[] str;
+	str = new char[other.len + 1];
+	strcpy(str, other.str);
+	len = other.len;
+	return *this;
+}
+
+ESPString & ESPString::operator=(const char * other)
+{
+	if (str != nullptr) delete[] str;
+	str = new char[strlen(other) + 1];
+	strcpy(str, other);
+	len = strlen(other);
+	return *this;
+}
+
+char & ESPString::operator[](unsigned int index)
+{
+	return str[index];
+}
+
+unsigned int ESPString::length()
+{
+	if (checkLen) {
+		len = strlen(str);
+		checkLen = false;
+	}
+	return len;
+}
+
+ESPString::operator char**()
+{
+	if(str != nullptr) delete[] str;
+	checkLen = true;
+	return &str;
+}
+
+ESPString::operator const char*()
+{
+	return str;
+}
+
+const char * ESPString::c_str()
+{
+	return str;
+}
+
+ESPString & ESPString::operator+=(const ESPString & other)
+{
+	length();
+	char * buffer = new char[len + 1];
+	strcpy(buffer, str);
+	delete[] str;
+	str = new char[len + other.len + 1];
+	memcpy(str, buffer, len);
+	delete[] buffer;
+	memcpy(str + len, other.str, other.len);
+	len += other.len;
+	str[len] = '\0';
+	return *this;
 }

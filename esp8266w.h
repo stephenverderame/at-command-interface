@@ -44,6 +44,42 @@ struct client {
 	char * msgBuffer;
 	client();
 };
+/**
+* Lightweight wrapper class for char *
+* Interfaces nicely with original code
+* Has (more or less) the same semantics as std::string
+*/
+class ESPString {
+private:
+	char * str;
+	unsigned int len;
+	bool checkLen = false;
+public:
+	ESPString();
+	ESPString(const ESPString & other);
+	ESPString(const char * str);
+	~ESPString();
+	ESPString& operator=(const ESPString & other);
+	ESPString& operator=(const char * other);
+	char& operator[](unsigned int index);
+	unsigned int length();
+	/**
+	* Convert to a char**
+	* Must be explicitly casted
+	* Use only for ESPWifi functions as it assumes that the buffer is being reallocated
+	*/
+	explicit operator char**();
+	operator const char*();
+	/**
+	* @return internal buffer
+	*/
+	const char * c_str();
+	ESPString& operator+=(const ESPString & other);
+	//string concatonation
+	friend ESPString operator+(const ESPString &, const ESPString &);
+
+};
+ESPString operator+(const ESPString & a, const ESPString & b);
 class ESPWifi {
 private:
     SoftwareSerial * serial;
@@ -198,6 +234,11 @@ public:
 	* @return true if connected to a server
 	*/
 	bool isConnectedToServer() const;
+
+	/**
+	* Changes the default baud rate of the esp
+	*/
+	bool changeBaudRate(int baudRate) const;
 
 };
 /**
