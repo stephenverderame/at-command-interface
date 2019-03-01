@@ -82,3 +82,17 @@ for(unsigned long i = 0; i < num; ++i){
 }
 delete[] connections;
 ```
+##### ESPString
+I added a string class in order to avoid you having to do memory management
+It interfaces nicely with the exisiting functions with an implicit cast to `char *` and an explicit cast to `char **` used to set the data of the string. ESPString follows the same semantics as an std::string
+
+```C++
+ESPString str;
+ESPString msg = "Hello";
+msg += " World"; //string concatonation
+wifi.send(msg);
+wifi.recv((char**)str); //explicit cast overwrites previous data, meant to be passed to an output parameter
+Serial.println(str.c_str()); //const char * conversion function
+Serial.println(msg[0]); //get char in string
+Serial.println(msg.length()); //get length of string
+```
