@@ -261,9 +261,10 @@ char * readline(const char * input, unsigned long & pos)
 	}
 	return nullptr;
 }
-void ESPWifi::handleConnections(client * clients) {
+void ESPWifi::handleConnections(client * clients, bool * newWifiConnection) {
+	if(newWifiConnection != nullptr) *newWifiConnection = false;
 	char * msg = readFromBoard();
-	if (strstr(msg, "FAIL")) { //disconnect
+	if (strstr(msg, "FAIL")) { //client disconnected from tcp server
 		unsigned long len = (unsigned long)(strchr(msg, ',') - msg);
 		char * ch1 = new char[len + 1];
 		memcpy(ch1, msg, len);
@@ -273,7 +274,10 @@ void ESPWifi::handleConnections(client * clients) {
 		clients[channel].connected = false;
 		delete[] ch1;
 	}
-	else if (strstr(msg, "CONNECT")) {
+	else if(newWifiConnection != nullptr && strstr(msg, "+STA_CONNECTED")){ //new station connected to access point
+		*newWifiConnection = true;
+	}
+	else if (strstr(msg, "CONNECT")) { //new client connected to tcp server
 		unsigned long len = (unsigned long)(strchr(msg, ',') - msg);
 		char * ch1 = new char[len + 1];
 		memcpy(ch1, msg, len);
@@ -283,7 +287,7 @@ void ESPWifi::handleConnections(client * clients) {
 		clients[channel].connected = true;
 		delete[] ch1;
 	}
-	if (strstr(msg, "+IPD")) {
+	if (strstr(msg, "+IPD")) { //new message from client to tcp server
 		char * c = strstr(msg, "+IPD,") + 5;
 		unsigned long channelLen = (unsigned long)(strrchr(c, ',') - c);
 		char * ch = new char[channelLen + 1];

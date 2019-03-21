@@ -190,15 +190,17 @@ public:
 	* @param connections, address of the list of clients connected to the ap. Must be freed
 	*/
 	bool getConnectedClients(connection ** connections, unsigned long & numConns) const;
-
-
+	
 	
 	/**
 	* @param clients, an array of clients. Updates the connected field
+	* @param newWifiConnection, if passed an address of a bool, returns true if there is a new connection to the access point
 	* If a message is received, marks the client that sent it as having a pending message to be processed with getPendingMsg()
+	* Handles "random" messages from the esp
 	* @see getPendingMsg
 	*/
-	void handleConnections(client * clients);
+	void handleConnections(client * clients, bool * newWifiConnection = nullptr);
+	
 
 	/**
 	* Non blocking receive. 
