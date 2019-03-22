@@ -30,8 +30,8 @@ bool ESPWifi::testDevice() const
 }
 bool ESPWifi::setWifiMode(wifiMode m)
 {
-	char msg[13];
-	sprintf(msg, "AT+CWMODE=%d", (int)m);
+	char msg[20];
+	sprintf(msg, "AT+CWMODE_CUR=%d", (int)m);
 	char * output;
 	bool s = sendCommand(msg, &output);
 	if (s) mode = m;
@@ -40,12 +40,13 @@ bool ESPWifi::setWifiMode(wifiMode m)
 }
 bool ESPWifi::joinAP(const char * name, const char * psswd) const
 {
-	unsigned long len = strlen(name) + strlen(psswd) + 16;
+	unsigned long len = strlen(name) + strlen(psswd) + 20;
 	char * msg = new char[len];
-	sprintf(msg, "AT+CWJAP=%c%s%c,%c%s%c", DQ, name, DQ, DQ, psswd, DQ);
+	sprintf(msg, "AT+CWJAP_CUR=%c%s%c,%c%s%c", DQ, name, DQ, DQ, psswd, DQ);
 	char * output;
 	bool s = sendCommand(msg, &output, 10000);
 	delete[] output;
+	delete[] msg;
 	return s;
 }
 bool ESPWifi::quitAP() const
