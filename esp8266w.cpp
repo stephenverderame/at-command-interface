@@ -45,6 +45,7 @@ bool ESPWifi::joinAP(const char * name, const char * psswd) const
 	sprintf(msg, "AT+CWJAP_CUR=%c%s%c,%c%s%c", DQ, name, DQ, DQ, psswd, DQ);
 	char * output;
 	bool s = sendCommand(msg, &output, 10000);
+	if(!s && strstr(output, "WIFI CONNECTED")) s = true;
 	delete[] output;
 	delete[] msg;
 	return s;
